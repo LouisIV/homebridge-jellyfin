@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Jellyfin",
   "name": "homebridge-jellyfin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Hombridge plugin for Jellyfin server",
   "license": "Apache-2.0",
   "repository": {
