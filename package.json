@@ -1,5 +1,4 @@
 {
-  "private": true,
   "displayName": "Homebridge Jellyfin",
   "name": "homebridge-jellyfin",
   "version": "1.0.0",
