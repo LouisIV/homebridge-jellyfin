@@ -1,16 +1,277 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "Jellyfin",
   "pluginType": "platform",
   "singular": true,
+  "headerDisplay": "Once you've ready with the configuration, you'll find the listening URL in the Homebridge logs. The URL should be added on your Plex Media Server's Webhooks page. You can find more details about the configuration on the [plugin's GitHub page](https://github.com/iharosi/homebridge-plex-webhooks/blob/master/README.md).",
+  "footerDisplay": "If you like this plugin, support the developer via [paypal](https://www.paypal.me/iharosi).",
   "schema": {
     "type": "object",
     "properties": {
       "name": {
         "title": "Name",
         "type": "string",
-        "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Jellyfin",
+        "minLength": 3,
+        "required": true
+      },
+      "sensors": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "title": "Sensor",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "placeholder": "e.g.: Jellyfin Movies",
+              "description": "This will be the name of your sensor in Home app",
+              "required": true
+            },
+            "filters": {
+              "type": "array",
+              "title": "Filter rulesets",
+              "minItems": 1,
+              "items": {
+                "type": "array",
+                "title": "Path-value pairs",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "title": "One path-value pair",
+                  "properties": {
+                    "path": {
+                      "title": "The path of the property to get",
+                      "type": "string",
+                      "placeholder": "e.g.: Player.title",
+                      "typeahead": {
+                        "source": [
+                          "PlayState.CanSeek",
+                          "PlayState.IsPaused",
+                          "PlayState.IsMuted",
+                          "PlayState.RepeatMode",
+                          "Capabilities.SupportsMediaControl",
+                          "Capabilities.SupportsContentUploading",
+                          "Capabilities.SupportsPersistentIdentifier",
+                          "Capabilities.SupportsSync",
+                          "RemoteEndPoint",
+                          "Id",
+                          "UserName",
+                          "UserId",
+                          "Client",
+                          "DeviceName",
+                          "DeviceId",
+                          "ApplicationVersion",
+                          "IsActive",
+                          "SupportsMediaControl",
+                          "SupportsRemoteControl",
+                          "HasCustomDeviceName",
+                          "ServerId",
+                          "NowPlayingItem.Name",
+                          "NowPlayingItem.SeverId",
+                          "NowPlayingItem.Id",
+                          "NowPlayingItem.DateCreated",
+                          "NowPlayingItem.HasSubtitles",
+                          "NowPlayingItem.HasSubtitles",
+                          "NowPlayingItem.Container",
+                          "NowPlayingItem.PremiereDate",
+                          "NowPlayingItem.Path",
+                          "NowPlayingItem.EnableMediaSourceDisplay",
+                          "NowPlayingItem.Overview",
+                          "NowPlayingItem.Taglines",
+                          "NowPlayingItem.Genres",
+                          "NowPlayingItem.CommunityRating",
+                          "NowPlayingItem.RunTimeTicks",
+                          "NowPlayingItem.ProductionYear",
+                          "NowPlayingItem.IndexNumber",
+                          "NowPlayingItem.ParentIndexNumber",
+                          "NowPlayingItem.IsHD",
+                          "NowPlayingItem.IsFolder",
+                          "NowPlayingItem.ParentId",
+                          "NowPlayingItem.Type",
+                          "NowPlayingItem.Studios",
+                          "NowPlayingItem.GenreItems",
+                          "NowPlayingItem.ParentBackdropItemId",
+                          "NowPlayingItem.ParentBackdropImageTags",
+                          "NowPlayingItem.LocalTrailerCount",
+                          "NowPlayingItem.SeriesName",
+                          "NowPlayingItem.SeriesId",
+                          "NowPlayingItem.SeasonId",
+                          "NowPlayingItem.SpecialFeatureCount",
+                          "NowPlayingItem.PrimaryImageAspectRatio",
+                          "NowPlayingItem.SeriesPrimaryImageTag",
+                          "NowPlayingItem.SeasonName",
+                          "NowPlayingItem.VideoType",
+                          "NowPlayingItem.SeriesStudio",
+                          "NowPlayingItem.LocationType",
+                          "NowPlayingItem.MediaType"
+                        ]
+                      },
+                      "required": true
+                    },
+                    "value": {
+                      "title": "The value what should be matched",
+                      "type": "string",
+                      "placeholder": "e.g.: Apple TV",
+                      "required": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "server": {
+        "type": "object",
+        "required": false,
+        "properties": {
+          "api_key": {
+            "title": "API Key",
+            "type": "string",
+            "placeholder": "API Key",
+            "required": true
+          },
+          "port": {
+            "title": "Port",
+            "type": "number",
+            "placeholder": "e.g.: 32401",
+            "default": 8096,
+            "minimum": 1024,
+            "maximum": 65535,
+            "required": false,
+            "description": "Port can be given between 1024 and 65535. In case port is omitted, the default 32401 will be used."
+          },
+          "address": {
+            "title": "IP address",
+            "type": "string",
+            "format": "ipv4",
+            "placeholder": "e.g.: 192.168.88.100",
+            "required": false,
+            "description": "The server can be forced to bind to the specified IP address. In case it's omitted, server will bind to the default interface."
+          },
+          "checkInterval": {
+            "title": "Check Interval",
+            "type": "number",
+            "placeholder": "60000 (1m)"
+          }
+        }
+      },
+      "verbose": {
+        "title": " verbose logging",
+        "type": "boolean"
       }
     }
-  }
+  },
+  "form": [
+    {
+      "key": "name"
+    },
+    {
+      "key": "sensors",
+      "type": "tabarray",
+      "add": "New",
+      "remove": "Delete",
+      "style": { "remove": "btn-danger" },
+      "title": "{{ value.name || 'Sensor #' + $index }}",
+      "items": [
+        "sensors[].name",
+        {
+          "key": "sensors[]",
+          "title": "Filter criterias",
+          "type": "section",
+          "expandable": true,
+          "expanded": false,
+          "orderable": false,
+          "items": [
+            {
+              "type": "help",
+              "helpvalue": "<p class=\"primary-text\">For the specified sensor to be activated, all the given path-value pairs in the ruleset must found in Plex's payload. In case multiple rulesets have been given, at least one ruleset of path-value pairs must found in the payload.</p>"
+            },
+            {
+              "key": "sensors[].filters",
+              "type": "section",
+              "title": "Filter rulesets (logical relation: OR)",
+              "buttonText": "Add a filter ruleset",
+              "orderable": false,
+              "items": [
+                {
+                  "key": "sensors[].filters[]",
+                  "title": "Path-value pairs (logical relation: AND)",
+                  "type": "section",
+                  "orderable": false,
+                  "buttonText": "Add a path-value pair",
+                  "items": [
+                    {
+                      "key": "sensors[].filters[][]",
+                      "title": "Path-value pair",
+                      "type": "flex",
+                      "flex-flow": "row wrap",
+                      "items": [
+                        {
+                          "type": "flex",
+                          "flex-flow": "column",
+                          "items": ["sensors[].filters[][].path"]
+                        },
+                        {
+                          "type": "flex",
+                          "flex-flow": "column",
+                          "items": ["sensors[].filters[][].value"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "server",
+      "title": "Webhooks server",
+      "type": "fieldset",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "help",
+          "helpvalue": "<p class=\"primary-text\">Listening port and IP address customization of the plugin's webhooks server</p>"
+        },
+        {
+          "type": "div",
+          "displayFlex": true,
+          "flex-direction": "row",
+          "items": ["server.port", "server.address"]
+        },
+        {
+          "type": "div",
+          "displayFlex": true,
+          "flex-direction": "row",
+          "items": ["server.api_key"]
+        },
+        {
+          "type": "div",
+          "displayFlex": true,
+          "flex-direction": "row",
+          "items": ["server.checkInterval"]
+        }
+      ]
+    },
+    {
+      "key": "logging",
+      "title": "Logging",
+      "type": "fieldset",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        {
+          "type": "help",
+          "helpvalue": "<p class=\"primary-text\">For debugging purposes. With verbose logging the plugin will log Plex's payload and path-value pair matching information into the Homebridge logs.</p>"
+        },
+        "verbose"
+      ]
+    }
+  ]
 }
